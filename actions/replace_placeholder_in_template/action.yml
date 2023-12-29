@@ -1,0 +1,20 @@
+name: Build and Push image
+description: Builds and pushes a docker image to a given container registry
+inputs:
+  template_file:
+    description: The template file to replace the token in
+    required: true
+  token:
+    description: The name of the token to replace (will be wrapped in [[]], i.e. to replace "[[image_tag]]" in the template, pass "image_tag"
+    required: true
+  value:
+    description: The value to replace the token with
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Add the SHA to K8s template
+      uses: composite
+      run: |
+        sed -i 's/\[\[${{ inputs.token }}\]\]/${{ inputs.value }}/g' ${{ inputs.template_file }}
