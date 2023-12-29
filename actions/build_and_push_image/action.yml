@@ -24,7 +24,7 @@ inputs:
   no-cache:
     description: Whether or not to use a cache when building the image
     required: false
-    default: false
+    default: "false"
 
 runs:
   using: composite
