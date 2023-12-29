@@ -15,6 +15,6 @@ runs:
   using: composite
   steps:
     - name: Add the SHA to K8s template
-      uses: composite
+      shell: bash
       run: |
         sed -i 's/\[\[${{ inputs.token }}\]\]/${{ inputs.value }}/g' ${{ inputs.template_file }}
