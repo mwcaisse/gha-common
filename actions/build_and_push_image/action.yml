@@ -13,6 +13,18 @@ inputs:
   tags:
     description: The tags to apply to the image
     required: true
+  context:
+    description: The context to build docker image in
+    required: false
+    default: .
+  file:
+    description: The docker file to use
+    required: false
+    default: Dockerfile
+  no-cache:
+    description: Whether or not to use a cache when building the image
+    required: false
+    default: false
 
 runs:
   using: composite
@@ -32,3 +44,6 @@ runs:
       with:
         push: true
         tags: ${{ inputs.tags }}
+        context: ${{ inputs.context }}
+        file: ${{ inputs.file }}
+        no-cache: ${{ inputs.no-cache }}
