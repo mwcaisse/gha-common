@@ -25,6 +25,9 @@ inputs:
     description: Whether or not to use a cache when building the image
     required: false
     default: "false"
+  build-args:
+    description: A list of any build arguments
+    required: false
 
 runs:
   using: composite
@@ -47,3 +50,4 @@ runs:
         context: ${{ inputs.context }}
         file: ${{ inputs.file }}
         no-cache: ${{ inputs.no-cache }}
+        build-args: ${{ inputs.build-args }}
