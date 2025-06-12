@@ -12,14 +12,11 @@ inputs:
     description: The kubernetes namespace
     required: true
     default: dev
-  kubernetes_server:
-    description: The host of the kubernetes server
+  do_kubernetes_cluster_name:
+    description: The name of the k8s cluster in kubernetes
     required: true
-  kubernetes_ca:
-    description: The CA file for the kubernetes server
-    required: true
-  kubernetes_token:
-    description: The token to use to deploy to kubernetes
+  do_token:
+    description: The digital ocean token to authenticate with the DO API
     required: true
   kubernetes_request_timeout:
     description: The timeout to pass to kubernetes when issuing the deploy / verification commands
@@ -29,17 +26,23 @@ inputs:
 runs:
   using: composite
   steps:
-    - name: Create k8s CA file
+    - name: Install Digital Ocean CTL
+      # Commit sha for top of V2
+      uses: digitalocean/action-doctl@0e7c88a2988e3a39f018289c5a1b90d460a62ffc
+      with:
+        token: ${{inputs.do_token}}
+    
+    - name: Configure Kubernetes
       shell: bash
       run: |
-        echo "${{ inputs.kubernetes_ca }}" >> /tmp/k8s_ca
+        doctl kubernetes cluster kubeconfig save --expiry-seconds 600 ${{inputs.do_kubernetes_cluster_name}}
 
     - name: Deploy to K8s
       shell: bash
       run: |
-        kubectl --certificate-authority="/tmp/k8s_ca" --server=${{ inputs.kubernetes_server }} --token=${{ inputs.kubernetes_token }} --namespace=${{ inputs.namespace }} apply -f ${{ inputs.deployment_file }} --request-timeout='${{ inputs.kubernetes_request_timeout }}'
+        kubectl --certificate-authority="/tmp/k8s_ca" --namespace=${{ inputs.namespace }} apply -f ${{ inputs.deployment_file }} --request-timeout='${{ inputs.kubernetes_request_timeout }}'
 
     - name: Verify Deployment
       shell: bash
       run: |
-        kubectl --certificate-authority="/tmp/k8s_ca" --server=${{ inputs.kubernetes_server }} --token=${{ inputs.kubernetes_token }} --namespace=${{ inputs.namespace }} rollout status deployment/${{ inputs.deployment_name }} --request-timeout='${{ inputs.kubernetes_request_timeout }}'
+        kubectl --certificate-authority="/tmp/k8s_ca" --namespace=${{ inputs.namespace }} rollout status deployment/${{ inputs.deployment_name }} --request-timeout='${{ inputs.kubernetes_request_timeout }}'
